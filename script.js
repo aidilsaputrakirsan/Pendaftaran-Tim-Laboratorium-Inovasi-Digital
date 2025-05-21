@@ -75,21 +75,53 @@ document.querySelectorAll('.apply-position').forEach(button => {
     });
 });
 
-// Position modal setup
+// Document ready function to ensure all elements are loaded
 document.addEventListener('DOMContentLoaded', function() {
-    // Modal event listeners
-    const positionModal = document.getElementById('positionModal');
-    if (positionModal) {
-        positionModal.addEventListener('show.bs.modal', function(event) {
-            // Button that triggered the modal
-            const button = event.relatedTarget;
-            // Extract position id
-            const positionId = button.getAttribute('data-position-id');
-            showPositionDetails(positionId);
+    // Initialize all tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    if (tooltipTriggerList.length) {
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
     }
     
-    // Position info buttons
+    // Setup form event listener
+    const form = document.getElementById('registrationForm');
+    if (form) {
+        form.addEventListener('submit', handleFormSubmit);
+    }
+    
+    // Position modal setup
+    setupModalListeners();
+    
+    // Setup navigation buttons
+    setupNavigationButtons();
+    
+    // Setup info buttons
+    setupInfoButtons();
+    
+    // Setup position cards in main section
+    setupPositionCards();
+});
+
+// Setup modal event listeners
+function setupModalListeners() {
+    const positionModal = document.getElementById('positionModal');
+    if (positionModal) {
+        positionModal.addEventListener('show.bs.modal', function(event) {
+            // Extract position id from the element that triggered the modal
+            const button = event.relatedTarget;
+            // Only proceed if button exists (to fix TypeError)
+            if (button) {
+                const positionId = button.getAttribute('data-position-id');
+                showPositionDetails(positionId);
+            }
+        });
+    }
+}
+
+// Setup info buttons
+function setupInfoButtons() {
     document.querySelectorAll('.position-info-btn').forEach(button => {
         button.addEventListener('click', function(e) {
             e.stopPropagation(); // Prevent the card click event from firing
@@ -104,43 +136,139 @@ document.addEventListener('DOMContentLoaded', function() {
             modal.show();
         });
     });
-});
+}
 
-// Navigation between steps
-document.querySelectorAll('.next-step').forEach(button => {
-    button.addEventListener('click', function() {
-        const currentStep = parseInt(this.getAttribute('data-next')) - 1;
-        const nextStep = parseInt(this.getAttribute('data-next'));
-        
-        // Validate current step
-        if (!validateStep(currentStep)) {
-            return;
+// Setup navigation buttons
+function setupNavigationButtons() {
+    document.querySelectorAll('.next-step').forEach(button => {
+        button.addEventListener('click', function() {
+            const currentStep = parseInt(this.getAttribute('data-next')) - 1;
+            const nextStep = parseInt(this.getAttribute('data-next'));
+            
+            // Validate current step
+            if (!validateStep(currentStep)) {
+                return;
+            }
+            
+            // Update steps
+            document.querySelector(`.step-content[data-step="${currentStep}"]`).classList.remove('active');
+            document.querySelector(`.step-content[data-step="${nextStep}"]`).classList.add('active');
+            
+            document.querySelector(`.step-pill[data-step="${currentStep}"]`).classList.remove('active');
+            document.querySelector(`.step-pill[data-step="${currentStep}"]`).classList.add('completed');
+            document.querySelector(`.step-pill[data-step="${nextStep}"]`).classList.add('active');
+        });
+    });
+
+    document.querySelectorAll('.prev-step').forEach(button => {
+        button.addEventListener('click', function() {
+            const currentStep = parseInt(this.getAttribute('data-prev')) + 1;
+            const prevStep = parseInt(this.getAttribute('data-prev'));
+            
+            // Update steps
+            document.querySelector(`.step-content[data-step="${currentStep}"]`).classList.remove('active');
+            document.querySelector(`.step-content[data-step="${prevStep}"]`).classList.add('active');
+            
+            document.querySelector(`.step-pill[data-step="${currentStep}"]`).classList.remove('active');
+            document.querySelector(`.step-pill[data-step="${prevStep}"]`).classList.remove('completed');
+            document.querySelector(`.step-pill[data-step="${prevStep}"]`).classList.add('active');
+        });
+    });
+}
+
+// Setup position cards
+function setupPositionCards() {
+    document.querySelectorAll('.job-card[data-bs-toggle="modal"]').forEach(card => {
+        card.addEventListener('click', function() {
+            const positionId = this.getAttribute('data-position-id');
+            showPositionDetails(positionId);
+        });
+    });
+}
+
+// Form submission handler
+function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    // Validate all fields before submission
+    if (!validateStep(3)) {
+        return;
+    }
+    
+    // Show loading overlay
+    document.getElementById('loadingOverlay').classList.add('show');
+    
+    // Collect form data
+    const formData = new FormData(this);
+    const data = {};
+    formData.forEach((value, key) => {
+        data[key] = value;
+    });
+    
+    // Call the web app using form submission to avoid CORS issues
+    // PENTING: Ganti DEPLOY_ID dengan ID deployment dari Google Apps Script Anda
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxVdK4PITl_u6PWfdI4-5DQQPasbbVihdx_pOuntpcn2pbEJaqthEANy4DRRh7GiZM2/exec';
+    
+    // Create a form element
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = scriptURL;
+    
+    // Add all form data as hidden inputs
+    Object.keys(data).forEach(key => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = data[key];
+        form.appendChild(input);
+    });
+    
+    // Create an iframe to handle the response
+    const iframe = document.createElement('iframe');
+    iframe.name = 'hidden_iframe';
+    iframe.id = 'hidden_iframe';
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+    
+    // Set up event listener for iframe load
+    iframe.addEventListener('load', function() {
+        // Hide loading overlay after a short delay
+        setTimeout(function() {
+            document.getElementById('loadingOverlay').classList.remove('show');
+            
+            // Show success message
+            document.getElementById('successMessage').style.display = 'block';
+            document.getElementById('registrationForm').style.display = 'none';
+            document.querySelector('.step-pills').style.display = 'none';
+            
+            // Scroll to success message
+            document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
+            
+            // Remove the iframe after we're done
+            setTimeout(function() {
+                if (document.body.contains(iframe)) {
+                    document.body.removeChild(iframe);
+                }
+            }, 1000);
+        }, 1500);
+    });
+    
+    // Set the target to our hidden iframe
+    form.target = 'hidden_iframe';
+    
+    // Add form to document
+    document.body.appendChild(form);
+    
+    // Submit the form
+    form.submit();
+    
+    // Remove the form
+    setTimeout(function() {
+        if (document.body.contains(form)) {
+            document.body.removeChild(form);
         }
-        
-        // Update steps
-        document.querySelector(`.step-content[data-step="${currentStep}"]`).classList.remove('active');
-        document.querySelector(`.step-content[data-step="${nextStep}"]`).classList.add('active');
-        
-        document.querySelector(`.step-pill[data-step="${currentStep}"]`).classList.remove('active');
-        document.querySelector(`.step-pill[data-step="${currentStep}"]`).classList.add('completed');
-        document.querySelector(`.step-pill[data-step="${nextStep}"]`).classList.add('active');
-    });
-});
-
-document.querySelectorAll('.prev-step').forEach(button => {
-    button.addEventListener('click', function() {
-        const currentStep = parseInt(this.getAttribute('data-prev')) + 1;
-        const prevStep = parseInt(this.getAttribute('data-prev'));
-        
-        // Update steps
-        document.querySelector(`.step-content[data-step="${currentStep}"]`).classList.remove('active');
-        document.querySelector(`.step-content[data-step="${prevStep}"]`).classList.add('active');
-        
-        document.querySelector(`.step-pill[data-step="${currentStep}"]`).classList.remove('active');
-        document.querySelector(`.step-pill[data-step="${prevStep}"]`).classList.remove('completed');
-        document.querySelector(`.step-pill[data-step="${prevStep}"]`).classList.add('active');
-    });
-});
+    }, 500);
+}
 
 // Validate each step
 function validateStep(step) {
@@ -178,6 +306,8 @@ function validateStep(step) {
 
 // Position selection
 function selectPosition(element) {
+    if (!element) return; // Guard clause to prevent errors
+    
     // Remove selected class from all cards
     document.querySelectorAll('.job-select-card').forEach(card => {
         card.classList.remove('selected');
@@ -195,60 +325,5 @@ document.querySelectorAll('.job-card[data-bs-toggle="modal"]').forEach(card => {
     card.addEventListener('click', function() {
         const positionId = this.getAttribute('data-position-id');
         showPositionDetails(positionId);
-    });
-});
-
-// Form submission
-document.getElementById('registrationForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Validate all fields before submission
-    if (!validateStep(3)) {
-        return;
-    }
-    
-    // Show loading overlay
-    document.getElementById('loadingOverlay').classList.add('show');
-    
-    // Collect form data
-    const formData = new FormData(this);
-    const data = {};
-    formData.forEach((value, key) => {
-        data[key] = value;
-    });
-    
-    fetch('https://script.google.com/macros/s/AKfycbze0bXgTF4eSlp9cwwMv78tpU5QQeMvyn1qX1cC8JPxmEv9boxPy6z5kr8ahilTIdhI/exec', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Hide loading overlay
-        document.getElementById('loadingOverlay').classList.remove('show');
-        
-        if (data.success) {
-            // Show success message
-            document.getElementById('successMessage').style.display = 'block';
-            document.getElementById('registrationForm').style.display = 'none';
-            document.querySelector('.step-pills').style.display = 'none';
-            
-            // Scroll to success message
-            document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth' });
-        } else {
-            // Show error message
-            document.getElementById('errorMessage').style.display = 'block';
-            document.getElementById('errorMessage').scrollIntoView({ behavior: 'smooth' });
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        // Hide loading overlay
-        document.getElementById('loadingOverlay').classList.remove('show');
-        // Show error message
-        document.getElementById('errorMessage').style.display = 'block';
-        document.getElementById('errorMessage').scrollIntoView({ behavior: 'smooth' });
     });
 });
