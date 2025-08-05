@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💻 Technical Implementation Guide: GitHub Codespaces untuk Dosen FSTI-ITK</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #24292e;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.9;
+            font-style: italic;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 2.2em;
+            margin: 30px 0 20px 0;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        h2 {
+            color: #34495e;
+            font-size: 1.8em;
+            margin: 25px 0 15px 0;
+            border-bottom: 2px solid #e74c3c;
+            padding-bottom: 8px;
+        }
+        
+        h3 {
+            color: #2c3e50;
+            font-size: 1.4em;
+            margin: 20px 0 10px 0;
+            border-left: 4px solid #f39c12;
+            padding-left: 15px;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        
+        .mermaid {
+            text-align: center;
+            margin: 25px 0;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: top;
+        }
+        
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        tr:hover {
+            background: #e3f2fd;
+            transform: scale(1.01);
+            transition: all 0.2s ease;
+        }
+        
+        code {
+            background: #f1f3f4;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Consolas', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+            color: #d63384;
+        }
+        
+        pre {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 5px solid #e91e63;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 5px solid #17a2b8;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 5px solid #ff6b6b;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .success-box {
+            background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 5px solid #28a745;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        blockquote {
+            border-left: 4px solid #3498db;
+            margin: 20px 0;
+            padding: 15px 25px;
+            background: #f8f9fa;
+            border-radius: 0 12px 12px 0;
+            font-style: italic;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .emoji {
+            font-size: 1.2em;
+        }
+        
+        .contact-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            margin-top: 40px;
+        }
+        
+        .contact-info a {
+            color: #ffeaa7;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+        
+        hr {
+            border: none;
+            height: 3px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 30px 0;
+            border-radius: 2px;
+        }
+        
+        .section-divider {
+            text-align: center;
+            margin: 40px 0;
+            position: relative;
+        }
+        
+        .section-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 1;
+        }
+        
+        .section-divider span {
+            background: white;
+            padding: 10px 20px;
+            position: relative;
+            z-index: 2;
+            border-radius: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                border-radius: 8px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            h2 {
+                font-size: 1.5em;
+            }
+            
+            table {
+                font-size: 14px;
+            }
+            
+            th, td {
+                padding: 8px;
+            }
+            
+            .mermaid {
+                padding: 10px;
+                font-size: 12px;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .content > * {
+            animation: fadeIn 0.6s ease forwards;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💻 Technical Implementation Guide: GitHub Codespaces untuk Dosen FSTI-ITK</h1>
+            <p><em>"Laptop 8GB RAM Penuh? Pakai Cloud Computer Gratis!"</em></p>
+        </div>
+        
+        <div class="content">
+            <div class="section-divider"><span>🤔 Pengenalan</span></div>
+            
+            <h2>🤔 Apa itu GitHub Codespaces?</h2>
+            <p>Bayangkan punya <strong>komputer development di cloud</strong> yang powerful, sementara laptop Anda tetap ringan untuk task lainnya.</p>
+            
+            <h3>🔍 <strong>Problem yang Real:</strong></h3>
+            <div class="mermaid">
+                pie title "Typical 8GB RAM Usage"
+                    "OS + System" : 35
+                    "Browser + Tabs" : 25
+                    "Office + Email + Zoom" : 25
+                    "Background Apps" : 10
+                    "Available for Development" : 5
+            </div>
+            
+            <h3>✅ <strong>Solusi Codespaces:</strong></h3>
+            <div class="mermaid">
+                flowchart LR
+                    A[💻 Laptop 8GB<br/>tetap ringan] --> B[🌐 Internet] --> C[☁️ Cloud Computer<br/>8-64GB RAM]
+                    
+                    D[📧 Email, Office] --> A
+                    E[🎥 Zoom, Browser] --> A
+                    F[💻 Heavy Development] --> C
+                    
+                    style A fill:#e1f5fe
+                    style C fill:#c8e6c9
+            </div>
+            
+            <div class="section-divider"><span>🎯 Registrasi</span></div>
+            
+            <h2>🎯 Cara Daftar GitHub Education</h2>
+            
+            <h3>Step-by-Step:</h3>
+            <div class="mermaid">
+                flowchart TD
+                    A[🌐 Buka github.com] --> B[👤 Daftar akun GitHub]
+                    B --> C[⚙️ Settings → Billing]
+                    C --> D[🎓 Education Benefits]
+                    D --> E[👨‍🏫 Select: Teacher]
+                    E --> F[📤 Upload SK mengajar ITK]
+                    F --> G[📋 Lengkapi form]
+                    G --> H[📨 Submit application]
+                    H --> I[⏳ Tunggu 3-7 hari]
+                    I --> J{✅ Approved?}
+                    J -->|Yes| K[🎉 GitHub Pro FREE activated]
+                    J -->|No| L[📧 Perbaiki dokumen & resubmit]
+                    
+                    style K fill:#c8e6c9
+                    style L fill:#ffcdd2
+            </div>
+            
+            <h3>Dokumen yang Diperlukan:</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>📄 <strong>Required</strong></th>
+                        <th>✅ <strong>Format</strong></th>
+                        <th>💡 <strong>Tips</strong></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Email ITK</strong></td>
+                        <td>@itk.ac.id</td>
+                        <td>Wajib email institusi</td>
+                    </tr>
+                    <tr>
+                        <td><strong>SK Mengajar</strong></td>
+                        <td>PDF scan jelas</td>
+                        <td>Dokumen resmi ITK</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Foto KTP</strong></td>
+                        <td>JPG/PNG</td>
+                        <td>Readable & valid</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="section-divider"><span>🎁 Benefits</span></div>
+            
+            <h2>🎁 Benefits yang Didapat Teacher</h2>
+            
+            <h3>✅ <strong>GitHub Education Teacher Benefits:</strong></h3>
+            
+            <div class="mermaid">
+                mindmap
+                  root((Teacher Benefits))
+                    GitHub Pro FREE
+                      Private repos unlimited
+                      Advanced collaboration
+                      GitHub Pages
+                    Copilot Pro FREE
+                      AI coding assistant
+                      $20/month value
+                      Code suggestions
+                    Codespaces Enhanced
+                      More hours/month
+                      Bigger machine types
+                      Education allowance
+                    GitHub Classroom
+                      Assignment management
+                      Auto-grading
+                      Student tracking
+            </div>
+            
+            <h3>📊 <strong>Value Comparison:</strong></h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th><strong>Service</strong></th>
+                        <th><strong>Regular Price</strong></th>
+                        <th><strong>Teacher Benefit</strong></th>
+                        <th><strong>Savings</strong></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>GitHub Pro</td>
+                        <td>$4/month</td>
+                        <td><strong>FREE</strong></td>
+                        <td>$48/year</td>
+                    </tr>
+                    <tr>
+                        <td>Copilot Pro</td>
+                        <td>$20/month</td>
+                        <td><strong>FREE</strong></td>
+                        <td>$240/year</td>
+                    </tr>
+                    <tr>
+                        <td>Codespaces</td>
+                        <td>Pay-per-use</td>
+                        <td><strong>Enhanced allowance</strong></td>
+                        <td>$50-100/year</td>
+                    </tr>
+                    <tr style="background: #c8e6c9; font-weight: bold;">
+                        <td><strong>Total</strong></td>
+                        <td><strong>$288/year</strong></td>
+                        <td><strong>$0</strong></td>
+                        <td><strong>💰 $288-388/year</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="section-divider"><span>💡 Coverage Program Studi</span></div>
+            
+            <h2>💡 Codespaces untuk 8 Prodi ITK</h2>
+            
+            <h3><strong>Coverage untuk Semua Program Studi:</strong></h3>
+            
+            <div class="mermaid">
+                flowchart TB
+                    subgraph "🖥️ COMPUTING PRODI"
+                        A[Sistem Informasi]
+                        B[Informatika]
+                        C[Bisnis Digital]
+                    end
+                    
+                    subgraph "⚡ ENGINEERING PRODI" 
+                        D[Teknik Elektro]
+                        E[Fisika]
+                    end
+                    
+                    subgraph "📊 ANALYTICS PRODI"
+                        F[Matematika]
+                        G[Statistika]
+                        H[Ilmu Aktuaria]
+                    end
+                    
+                    A --> I[Web Development<br/>Database Systems<br/>Software Engineering]
+                    B --> J[Programming Fundamentals<br/>AI/ML<br/>Mobile Development]
+                    C --> K[Digital Analytics<br/>E-Commerce Dev<br/>Business Intelligence]
+                    
+                    D --> L[Signal Processing<br/>IoT Programming<br/>Control Systems]
+                    E --> M[Scientific Computing<br/>Simulation<br/>Data Analysis]
+                    
+                    F --> N[Numerical Methods<br/>Mathematical Modeling<br/>Algorithm Design]
+                    G --> O[Statistical Computing<br/>Data Visualization<br/>R/Python Analytics]
+                    H --> P[Risk Modeling<br/>Financial Analytics<br/>Actuarial Computing]
+            </div>
+            
+            <h3><strong>Mata Kuliah yang Cocok per Kategori:</strong></h3>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>🎯 <strong>Kategori</strong></th>
+                        <th>📚 <strong>Mata Kuliah Examples</strong></th>
+                        <th>🛠️ <strong>Tools Available</strong></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Programming Fundamentals</strong></td>
+                        <td>Algoritma, Struktur Data, OOP</td>
+                        <td>Python, Java, C++, debugger</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Web & Mobile Development</strong></td>
+                        <td>Frontend, Backend, Mobile Apps</td>
+                        <td>HTML/CSS/JS, React, Flutter, Node.js</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Data Science & Analytics</strong></td>
+                        <td>Data Mining, Visualization, ML</td>
+                        <td>pandas, numpy, matplotlib, scikit-learn</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Scientific Computing</strong></td>
+                        <td>Numerical Methods, Simulation</td>
+                        <td>SciPy, mathematical libraries</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Database & Systems</strong></td>
+                        <td>Database Design, SQL, NoSQL</td>
+                        <td>PostgreSQL, MongoDB, MySQL</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Engineering Applications</strong></td>
+                        <td>Signal Processing, IoT, Control</td>
+                        <td>MATLAB alternatives, embedded tools</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="section-divider"><span>⚡ Spesifikasi</span></div>
+            
+            <h2>⚡ Spesifikasi & Environment</h2>
+            
+            <h3><strong>Machine Types Available:</strong></h3>
+            <div class="mermaid">
+                graph LR
+                    A[2 cores<br/>8GB RAM<br/>32GB storage] --> B[4 cores<br/>16GB RAM<br/>32GB storage]
+                    B --> C[8 cores<br/>32GB RAM<br/>64GB storage]
+                    C --> D[32 cores<br/>64GB RAM<br/>128GB storage]
+                    
+                    A -.->|Basic Programming| E[Algoritma<br/>Web Dasar]
+                    B -.->|Standard Development| F[Mobile Apps<br/>Data Analysis]
+                    C -.->|Heavy Computing| G[ML Training<br/>Large Datasets]
+                    D -.->|Research Computing| H[Simulations<br/>Complex Analytics]
+                    
+                    style A fill:#e3f2fd
+                    style B fill:#f3e5f5
+                    style C fill:#fff3e0
+                    style D fill:#fce4ec
+            </div>
+            
+            <h3><strong>Pre-installed Development Stack:</strong></h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th><strong>Category</strong></th>
+                        <th><strong>Tools & Libraries</strong></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Languages</strong></td>
+                        <td>Python 3.x, JavaScript/Node.js, Java, C/C++, Go, PHP, Ruby</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Data Science</strong></td>
+                        <td>NumPy, pandas, SciPy, Matplotlib, seaborn, Plotly</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Machine Learning</strong></td>
+                        <td>scikit-learn, TensorFlow, PyTorch, Keras</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Web Development</strong></td>
+                        <td>React, Vue.js, Express, Django, Flask</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Database</strong></td>
+                        <td>PostgreSQL, MySQL, MongoDB, SQLite</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Development Tools</strong></td>
+                        <td>Git, Docker, VS Code extensions, Jupyter</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="section-divider"><span>📚 Implementation</span></div>
+            
+            <h2>📚 Implementation Workflow</h2>
+            
+            <h3><strong>Teaching Workflow:</strong></h3>
+            <div class="mermaid">
+                sequenceDiagram
+                    participant D as Dosen
+                    participant GC as GitHub Classroom
+                    participant S as Mahasiswa
+                    participant CS as Codespaces
+
+                    D->>GC: 1. Create Assignment
+                    D->>GC: 2. Enable Codespaces
+                    D->>GC: 3. Set machine specifications
+                    GC->>S: 4. Distribute assignment link
+                    S->>CS: 5. Launch Codespace
+                    CS->>S: 6. Environment ready (consistent)
+                    S->>S: 7. Work on assignment
+                    S->>GC: 8. Submit via Git
+                    D->>GC: 9. Review & provide feedback
+            </div>
+            
+            <h3><strong>Development Cycle:</strong></h3>
+            <div class="mermaid">
+                graph TD
+                    A[💡 Idea/Assignment] --> B[🚀 Launch Codespace]
+                    B --> C[⚡ Instant Environment]
+                    C --> D[💻 Code & Develop]
+                    D --> E[🧪 Test & Debug]
+                    E --> F[🔄 Collaborate/Review]
+                    F --> G[📤 Submit/Deploy]
+                    G --> H[💾 Archive/Stop Codespace]
+                    
+                    H -.->|Next project| A
+                    
+                    style C fill:#c8e6c9
+                    style H fill:#ffecb3
+            </div>
+            
+            <div class="section-divider"><span>🚨 Limitations</span></div>
+            
+            <h2>🚨 Realistic Limitations & Solutions</h2>
+            
+            <h3><strong>Limitations Analysis:</strong></h3>
+            <div class="mermaid">
+                pie title "Usage Suitability"
+                    "Perfect for Development" : 60
+                    "Good with Workarounds" : 25
+                    "Not Suitable" : 15
+            </div>
+            
+            <h3><strong>Limitation vs Solution Matrix:</strong></h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>❌ <strong>Limitation</strong></th>
+                        <th>🔄 <strong>Hybrid Solution</strong></th>
+                        <th>💡 <strong>Best Practice</strong></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Internet dependent</strong></td>
+                        <td>Local backup + sync</td>
+                        <td>Stable connection planning</td>
+                    </tr>
+                    <tr>
+                        <td><strong>No GPU (free tier)</strong></td>
+                        <td>Google Colab, Kaggle</td>
+                        <td>Hybrid ML workflow</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Auto-shutdown on idle</strong></td>
+                        <td>Save work frequently</td>
+                        <td>Use Git consistently</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Storage limits</strong></td>
+                        <td>Cloud storage integration</td>
+                        <td>External data repos</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Learning curve</strong></td>
+                        <td>Start small, scale up</td>
+                        <td>Begin with simple projects</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="section-divider"><span>💰 Resource Management</span></div>
+            
+            <h2>💰 Resource Management Strategy</h2>
+            
+            <h3><strong>Monthly Usage Optimization:</strong></h3>
+            <div class="mermaid">
+                pie title "Recommended Usage Distribution"
+                    "Teaching Sessions" : 40
+                    "Research/Development" : 30
+                    "Student Support" : 20
+                    "Buffer/Reserve" : 10
+            </div>
+            
+            <h3><strong>Cost-Effective Practices:</strong></h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>💡 <strong>Strategy</strong></th>
+                        <th>📊 <strong>Impact</strong></th>
+                        <th>⏱️ <strong>Implementation</strong></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Stop unused codespaces</strong></td>
+                        <td>Save 60-80% hours</td>
+                        <td>Auto-timeout settings</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Right-size machines</strong></td>
+                        <td>Save 50% costs</td>
+                        <td>Match spec to task</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Batch similar tasks</strong></td>
+                        <td>Optimize usage</td>
+                        <td>Schedule coding sessions</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Template reuse</strong></td>
+                        <td>Save setup time</td>
+                        <td>Create course templates</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="section-divider"><span>💬 FAQ</span></div>
+            
+            <h2>💬 FAQ Berdasarkan 8 Prodi ITK</h2>
+            
+            <div class="info-box">
+                <p><strong>Q: Cocok untuk semua prodi teknik?</strong><br>
+                A: Ya, dari programming dasar sampai scientific computing tersedia</p>
+            </div>
+            
+            <div class="info-box">
+                <p><strong>Q: Mahasiswa statistika bisa pakai R?</strong><br>
+                A: Bisa install R, atau pakai RStudio Cloud integration</p>
+            </div>
+            
+            <div class="info-box">
+                <p><strong>Q: Untuk prodi bisnis digital gimana?</strong><br>
+                A: Perfect untuk web development, data analytics, e-commerce projects</p>
+            </div>
+            
+            <div class="info-box">
+                <p><strong>Q: Teknik elektro bisa simulasi?</strong><br>
+                A: Bisa untuk software simulation, hardware simulation perlu tools khusus</p>
+            </div>
+            
+            <div class="warning-box">
+                <p><strong>Q: Replace lab komputer kampus?</strong><br>
+                A: Complement, bukan replace. Hybrid approach terbaik</p>
+            </div>
+            
+        </div>
+        
+        <div class="contact-info">
+            <p>📧 Untuk pertanyaan lebih lanjut, hubungi: <a href="https://aidilsaputrakirsan.github.io" target="_blank">Aidil Saputra Kirsan - Kepala Lab Inovasi Digital FSTI ITK</a></p>
+            <p>🚀 <strong>Start here:</strong> <a href="https://education.github.com" target="_blank">education.github.com</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Mermaid with enhanced settings
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#667eea',
+                primaryTextColor: '#ffffff',
+                primaryBorderColor: '#764ba2',
+                lineColor: '#2c3e50',
+                sectionBkgColor: '#f8f9fa',
+                altSectionBkgColor: '#ffffff',
+                gridColor: '#e9ecef',
+                secondaryColor: '#e74c3c',
+                tertiaryColor: '#f39c12'
+            },
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis',
+                padding: 10
+            },
+            pie: {
+                textPosition: 0.7,
+                titleTopMargin: 25
+            },
+            mindmap: {
+                maxNodeWidth: 200,
+                padding: 10,
+                useMaxWidth: true
+            },
+            sequence: {
+                diagramMarginX: 50,
+                diagramMarginY: 10,
+                actorMargin: 50,
+                width: 150,
+                height: 65,
+                boxMargin: 10,
+                boxTextMargin: 5,
+                noteMargin: 10,
+                messageMargin: 35,
+                mirrorActors: true,
+                bottomMarginAdj: 1,
+                useMaxWidth: true
+            },
+            graph: {
+                useMaxWidth: true,
+                htmlLabels: true
+            }
+        });
+
+        // Enhanced diagram rendering with error handling
+        function renderDiagrams() {
+            const diagrams = document.querySelectorAll('.mermaid');
+            diagrams.forEach((diagram, index) => {
+                try {
+                    // Add unique ID for each diagram
+                    if (!diagram.id) {
+                        diagram.id = `mermaid-diagram-${index}`;
+                    }
+                    
+                    // Force re-render if needed
+                    if (diagram.innerHTML && !diagram.querySelector('svg')) {
+                        mermaid.init(undefined, diagram);
+                    }
+                } catch (error) {
+                    console.warn('Error rendering diagram:', error);
+                    diagram.innerHTML = '<p style="color: #e74c3c; font-style: italic;">⚠️ Diagram rendering error</p>';
+                }
+            });
+        }
+
+        // Multiple rendering attempts for reliability
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(renderDiagrams, 100);
+            setTimeout(renderDiagrams, 500);
+            setTimeout(renderDiagrams, 1000);
+        });
+
+        // Smooth scrolling for internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add loading animation
+        window.addEventListener('load', function() {
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+        });
+    </script>
+</body>
+</html>
