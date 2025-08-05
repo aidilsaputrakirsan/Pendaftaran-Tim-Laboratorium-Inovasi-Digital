@@ -1,7 +1,15 @@
-# 💻 Solusi Development Environment: GitHub Codespaces untuk Dosen FSTI-ITK
+# 💻 Technical Implementation Guide: GitHub Codespaces untuk Dosen FSTI-ITK
 *"Laptop 8GB RAM Penuh? Pakai Cloud Computer Gratis!"*
 
 ---
+
+<script src="https://unpkg.com/mermaid@10.6.1/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark'
+  });
+</script>
 
 ## 🤔 Apa itu GitHub Codespaces?
 
